@@ -1,48 +1,58 @@
-# Import các module cần thiết từ Flask
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
+import json
+from difflib import SequenceMatcher
 
-# Import các hàm từ module 'main'
-from main import load_knowledge_base, find_closest_match, get_response
+app = Flask(__name__)
 
-# Định nghĩa lớp ChatBotApp
-class ChatBotApp:
-    # Phương thức khởi tạo
-    def __init__(self, knowledge_base_file):
-        # Khởi tạo ứng dụng Flask
-        self.app = Flask(__name__)
-        # Tải cơ sở tri thức từ file JSON
-        self.knowledge_base = load_knowledge_base(knowledge_base_file)
-        # Thiết lập các route cho ứng dụng
-        self.setup_routes()
+def load_knowledge_base(file_path):
+    # Tải cơ sở tri thức từ file json
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
+    except Exception as e:
+        print(f"Không thể tải dữ liệu: {str(e)}")
+        return None
 
-    # Phương thức thiết lập các route
-    def setup_routes(self):
-        # Route cho trang chủ
-        @self.app.route("/")
-        def home():
-            return render_template("index.html")
+def find_closest_match(input_question, knowledge_base):
+    # Tìm câu hỏi gần nhất trong cơ sở tri thức so với câu hỏi đầu vào
+    max_ratio = 0
+    closest_question = None
+    for question in knowledge_base.keys():
+        ratio = SequenceMatcher(None, input_question, question).ratio()
+        if ratio > max_ratio:
+            max_ratio = ratio
+            closest_question = question
+    return closest_question if max_ratio > 0.6 else None
 
-        # Route để xử lý các câu hỏi từ người dùng
-        @self.app.route("/ask", methods=["POST"])
-        def ask():
-            if request.method == "POST":
-                data = request.get_json()
-                user_input = data["question"]
-                if self.knowledge_base is None:
-                    return jsonify({"answer": "Tôi không thể trả lời câu hỏi này"})
-                best_match = find_closest_match(user_input, self.knowledge_base.keys())
-                if best_match:
-                    answer = get_response(best_match, self.knowledge_base)
-                    return jsonify({"answer": f"{answer}"})
-                else:
-                    return jsonify({"answer": "Xin lỗi, Bạn có thể hỏi tôi câu khác được không?"})
+def get_response(question, knowledge_base):
+    # Lấy câu trả lời cho câu hỏi từ cơ sở tri thức
+    closest_question = find_closest_match(question, knowledge_base)
+    if closest_question:
+        return knowledge_base[closest_question]
+    else:
+        return None
 
-    # Phương thức chạy ứng dụng
-    def run(self, debug=False):
-        self.app.run(debug=debug)
+def update_knowledge_base(question, answer, knowledge_base):
+    # Cập nhật cơ sở tri thức với câu hỏi và câu trả lời mới
+    knowledge_base[question] = answer
+    with open('knowledge_base.json', 'w', encoding='utf-8') as file:
+        json.dump(knowledge_base, file, indent=2)
 
-# Điểm bắt đầu của chương trình
-if __name__ == "__main__":
-    # Khởi tạo một đối tượng ChatBotApp và chạy ứng dụng
-    bot_app = ChatBotApp('knowledge_base.json')
-    bot_app.run(debug=True)
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_input = request.form['user_input']
+    knowledge_base = load_knowledge_base('knowledge_base.json')
+    response = get_response(user_input, knowledge_base)
+    if response:
+        return response
+    else:
+        return "Tôi không hiểu, Bạn có thể dạy cho tôi không?"
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
