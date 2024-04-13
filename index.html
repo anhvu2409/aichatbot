@@ -1,77 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ChatBot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f1f1f1;
         }
         .chat-container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+        }
+        .chat-box {
             border: 1px solid #ccc;
-            background-color: #fff;
-            height: 500px;
-            overflow-y: auto;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
         }
-        .chat-message {
-            margin-bottom: 20px;
+        .user-msg {
+            text-align: right;
+            color: blue;
         }
-        .user-message {
-            color: #007BFF;
-            font-weight: bold;
-        }
-        .bot-message {
-            color: #333;
+        .bot-msg {
+            text-align: left;
+            color: green;
         }
     </style>
 </head>
 <body>
-    <div class="chat-container" id="chatContainer">
-        <!-- Chat messages will be added here -->
-    </div>
-
-    <div style="margin: 20px 0;">
-        <input type="text" id="userInput" placeholder="Type your message here..." style="width: 70%;">
-        <button onclick="sendMessage()">Send</button>
+    <div class="chat-container">
+        <div id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Nhập câu hỏi của bạn...">
     </div>
 
     <script>
-        function sendMessage() {
-            var input = document.getElementById('userInput');
-            var message = input.value;
-            input.value = '';
+        document.addEventListener('DOMContentLoaded', function () {
+            const chatBox = document.getElementById('chat-box');
+            const userInput = document.getElementById('user-input');
 
-            // Add user message to chat
-            var chatContainer = document.getElementById('chatContainer');
-            var userMessageElement = document.createElement('p');
-            userMessageElement.className = 'chat-message user-message';
-            userMessageElement.textContent = 'User: ' + message;
-            chatContainer.appendChild(userMessageElement);
+            function addUserMessage(message) {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'chat-box user-msg';
+                userDiv.innerHTML = message;
+                chatBox.appendChild(userDiv);
+            }
 
-            // Send a POST request to the /ask route
-            fetch('/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ question: message })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Add bot message to chat
-                var botMessageElement = document.createElement('p');
-                botMessageElement.className = 'chat-message bot-message';
-                botMessageElement.textContent = 'Bot: ' + data.answer;
-                chatContainer.appendChild(botMessageElement);
-            })
-            .catch(error => { console.error('Error:', error);
+            function addBotMessage(message) {
+                const botDiv = document.createElement('div');
+                botDiv.className = 'chat-box bot-msg';
+                botDiv.innerHTML = message;
+                chatBox.appendChild(botDiv);
+            }
+
+            function sendUserMessage() {
+                const message = userInput.value.trim();
+                if (message !== '') {
+                    addUserMessage(message);
+                    userInput.value = '';
+                    fetch('/chat', {
+                        method: 'POST',
+                        body: new URLSearchParams({ user_input: message }),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    })
+                    .then(response => response.text())
+                    .then(data => addBotMessage(data));
+                }
+            }
+
+            userInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendUserMessage();
+                }
             });
-        }
+        });
     </script>
 </body>
 </html>
