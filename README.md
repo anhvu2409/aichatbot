@@ -2,13 +2,13 @@ Lưu ý: Đây chỉ là sản phẩm học tập, không có nhiều giá trị
 
 Bạn có thể tải file zip của dự án này về và Host trên bất kỳ nền tảng cloud nào hỗ trợ tạo App Web sử dụng Flask
 
-Link trang web đã Host Chatbot bằng PythonAnywhere: 
+Link trang web đã Host Chatbot bằng PythonAnywhere: http://hoangtranduc.pythonanywhere.com/
 
-Lỗi hiện có:
+
 
 Tính năng Tự học hỏi câu trả lời từ người dùng không hoạt động trên Web(Vẫn còn hoạt động trên Terminal).
 
-Thỉnh thoảng chatbot sẽ hiểu sai nội dung câu hỏi.
+
 
 CÁCH HOST CHATBOT TRÊN MÁY TÍNH CÁ NHÂN
 
@@ -24,7 +24,6 @@ Bước 2: Click chuột phải vào file Simple-Chatbot vừa tải về -> Ter
 
 Hoặc bạn có thể mở Terminal từ bên ngoài -> Trong trang Terminal, gõ cd + đường dẫn đến tệp
 
-Ví dụ: cd D:\Simple-Chatbot
 
 Trong trang Terminal gõ
 
@@ -40,6 +39,3 @@ Debugger is active!
 Debugger PIN: 974-xxx-xxx
 Bước 3: Mở trình duyệt bất kỳ, nhập http://localhost:8080
 
-KẾT QUẢ:
-
-image
