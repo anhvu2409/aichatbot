@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatBot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f1f1;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            height: 500px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            margin-bottom: 20px;
+        }
+        .user-message {
+            color: #007BFF;
+            font-weight: bold;
+        }
+        .bot-message {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chatContainer">
+        <!-- Chat messages will be added here -->
+    </div>
+
+    <div style="margin: 20px 0;">
+        <input type="text" id="userInput" placeholder="Type your message here..." style="width: 70%;">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            var input = document.getElementById('userInput');
+            var message = input.value;
+            input.value = '';
+
+            // Add user message to chat
+            var chatContainer = document.getElementById('chatContainer');
+            var userMessageElement = document.createElement('p');
+            userMessageElement.className = 'chat-message user-message';
+            userMessageElement.textContent = 'User: ' + message;
+            chatContainer.appendChild(userMessageElement);
+
+            // Send a POST request to the /ask route
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Add bot message to chat
+                var botMessageElement = document.createElement('p');
+                botMessageElement.className = 'chat-message bot-message';
+                botMessageElement.textContent = 'Bot: ' + data.answer;
+                chatContainer.appendChild(botMessageElement);
+            })
+            .catch(error => { console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
