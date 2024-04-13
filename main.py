@@ -37,6 +37,7 @@ def update_knowledge_base(question, answer, knowledge_base):
         json.dump(knowledge_base, file, indent=2)
 
 def start_chat(knowledge_base):
+    knowledge_base = load_knowledge_base('knowledge_base.json')
     # Bắt đầu cuộc trò chuyện với bot
     while True:
         user_input = input('Bạn: ')
@@ -51,6 +52,10 @@ def start_chat(knowledge_base):
             if new_answer.lower() != 'skip':
                 update_knowledge_base(user_input, new_answer, knowledge_base)
                 print('Chatbot: Cảm ơn, Tôi đã biết cách trả lời câu hỏi này.')
+
+if __name__ == '__main__':
+    start_chat()  # Bắt đầu cuộc trò chuyện với bot
+
 
 if __name__ == '__main__':
     knowledge_base = load_knowledge_base('knowledge_base.json')  # Tải cơ sở tri thức từ file 'knowledge_base.json'
